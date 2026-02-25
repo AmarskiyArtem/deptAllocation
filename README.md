@@ -1,3 +1,5 @@
+Fully vibe-coded, minimally reviewed.
+
 # DeptAllocation
 
 [![Tests](https://github.com/AmarskiyArtem/deptAllocation/actions/workflows/tests.yml/badge.svg)](https://github.com/AmarskiyArtem/deptAllocation/actions/workflows/tests.yml)
