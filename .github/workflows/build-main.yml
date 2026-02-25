@@ -1,10 +1,12 @@
-name: Build Main
+name: Build Release
 
 on:
-  push:
-    branches:
-      - main
-  workflow_dispatch:
+  release:
+    types:
+      - published
+
+permissions:
+  contents: write
 
 jobs:
   build:
@@ -19,10 +21,12 @@ jobs:
             artifact_path: |
               dist/DeptAllocation.app
               dist/DeptAllocation.zip
+            release_files: dist/DeptAllocation.zip
           - os: windows-latest
             script: ./build_windows.sh
             artifact_name: DeptAllocation-Windows
             artifact_path: dist/DeptAllocation.exe
+            release_files: dist/DeptAllocation.exe
 
     steps:
       - name: Checkout
@@ -47,3 +51,8 @@ jobs:
           name: ${{ matrix.artifact_name }}
           path: ${{ matrix.artifact_path }}
           if-no-files-found: error
+
+      - name: Upload release assets
+        uses: softprops/action-gh-release@v2
+        with:
+          files: ${{ matrix.release_files }}

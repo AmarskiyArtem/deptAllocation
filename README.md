@@ -3,7 +3,7 @@ Fully vibe-coded, minimally reviewed.
 # DeptAllocation
 
 [![Tests](https://github.com/AmarskiyArtem/deptAllocation/actions/workflows/tests.yml/badge.svg)](https://github.com/AmarskiyArtem/deptAllocation/actions/workflows/tests.yml)
-[![Build Main](https://github.com/AmarskiyArtem/deptAllocation/actions/workflows/build-main.yml/badge.svg)](https://github.com/AmarskiyArtem/deptAllocation/actions/workflows/build-main.yml)
+[![Build Release](https://github.com/AmarskiyArtem/deptAllocation/actions/workflows/build-main.yml/badge.svg)](https://github.com/AmarskiyArtem/deptAllocation/actions/workflows/build-main.yml)
 
 Desktop-приложение на `PySide6` для учета должников и кредиторов с пропорциональным распределением платежей.
 
