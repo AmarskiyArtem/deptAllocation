@@ -1,91 +1,74 @@
-# Приложение для распределения долгов
+# DeptAllocation
 
-GUI-приложение на Python (`PySide6`) для Windows и macOS, которое:
-- хранит список должников;
-- хранит по каждому должнику список кредиторов и суммы долга;
-- распределяет платеж пропорционально текущим долгам;
-- уменьшает долги после применения платежа;
-- сохраняет историю платежей;
-- экспортирует текущее состояние и историю в Excel.
+Desktop-приложение на `PySide6` для учета должников и кредиторов с пропорциональным распределением платежей.
+
+## Возможности
+
+- Ведение списка должников.
+- Добавление, редактирование и удаление кредиторов с суммами требований.
+- Предпросмотр распределения платежа между кредиторами.
+- Применение платежа с сохранением истории.
+- Удаление платежа из истории с восстановлением сумм требований.
 
 ## Требования
 
-- Python 3.10+
-- `PySide6`
-- `openpyxl`
+- Python 3.11+ (рекомендуется)
+- `pip`
 
 ## Установка
-
-Windows:
-
-```bash
-python -m venv .venv
-.venv\Scripts\activate
-pip install -r requirements.txt
-```
-
-macOS:
 
 ```bash
 python3 -m venv .venv
 source .venv/bin/activate
+pip install -U pip
 pip install -r requirements.txt
 ```
 
 ## Запуск
 
-Windows:
-
 ```bash
 python app.py
 ```
 
-macOS:
+## Тесты
 
 ```bash
-python3 app.py
+python -m unittest discover -s tests -p "test_*.py"
 ```
 
-После запуска:
-1. Добавьте должника.
-2. Добавьте кредиторов и суммы долга.
-3. Введите сумму платежа.
-4. Нажмите `Предпросмотр` или `Применить платеж`.
-5. Для выгрузки используйте кнопку `Экспорт в Excel`.
-
-## Данные
-
-- Файл данных: `debt_data.json` (создается рядом с `app.py` автоматически).
-- История хранится внутри каждого должника.
-
-## Экспорт в Excel
-
-Создается `.xlsx` файл с листами:
-- `CurrentState` — текущее состояние долгов;
-- `History` — история платежей и распределений.
-
-## Отправка готового приложения (для людей без Python)
+## Сборка
 
 ### macOS
 
-1. На вашей машине выполните:
 ```bash
-./build_portable_mac.sh
+./build_mac.sh
 ```
-2. Будет создана папка:
-`release/DebtAllocator-mac`
-3. Заархивируйте **всю папку** `DebtAllocator-mac` и отправьте архив.
-4. Получатель распаковывает архив и запускает:
-`Run DebtAllocator.command` (двойной клик).
+
+Результат:
+
+- `dist/DeptAllocation.app`
+- `dist/DeptAllocation.zip` (архив для передачи пользователям macOS, создается через `ditto`)
+
+Опционально можно подписать приложение Developer ID во время сборки:
+
+```bash
+MAC_SIGN_IDENTITY="Developer ID Application: Your Name (TEAMID)" ./build_mac.sh
+```
+
+Если `MAC_SIGN_IDENTITY` не задана, приложение собирается без Developer ID подписи.
 
 ### Windows
 
-1. На вашей машине с Windows выполните:
-```bat
-build_portable_windows.bat
+```bash
+./build_windows.sh
 ```
-2. Будет создана папка:
-`release\DebtAllocator-windows`
-3. Заархивируйте **всю папку** `DebtAllocator-windows` и отправьте архив.
-4. Получатель распаковывает архив и запускает:
-`Start DebtAllocator.bat` (двойной клик).
+
+Результат: `dist/DeptAllocation.exe`
+
+## Где хранятся данные
+
+Данные сохраняются в `debt_data.json` в системной папке приложения:
+
+- macOS: `~/Library/Application Support/DeptAllocation/debt_data.json`
+- Windows: `%APPDATA%/DeptAllocation/debt_data.json`
+- Linux: `$XDG_DATA_HOME/dept_allocation/debt_data.json` или `~/.local/share/dept_allocation/debt_data.json`
