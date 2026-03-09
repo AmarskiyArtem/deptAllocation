@@ -23,7 +23,7 @@ from PySide6.QtWidgets import (
     QWidget,
 )
 
-from .constants import MONEY_Q
+from .constants import EXACT_PERCENT_Q, MONEY_Q
 from .store import DebtStore
 from .utils import format_datetime_ru, money_to_str, now_iso, percent_of, to_decimal
 
@@ -250,7 +250,7 @@ class MainWindow(QMainWindow):
             name_item = QTableWidgetItem(creditor["name"])
             name_item.setData(Qt.UserRole, creditor["id"])
             amount_item = QTableWidgetItem(money_to_str(claim))
-            percentage_item = QTableWidgetItem(f"{percent_of(claim, total_claim):.2f}%")
+            percentage_item = QTableWidgetItem(f"{percent_of(claim, total_claim, EXACT_PERCENT_Q):.6f}%")
             amount_item.setTextAlignment(Qt.AlignRight | Qt.AlignVCenter)
             percentage_item.setTextAlignment(Qt.AlignRight | Qt.AlignVCenter)
             self.creditors_table.setItem(row, 0, name_item)

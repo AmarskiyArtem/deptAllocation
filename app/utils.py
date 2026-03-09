@@ -27,7 +27,7 @@ def format_datetime_ru(value: str) -> str:
     return dt.strftime("%d.%m.%Y %H:%M:%S")
 
 
-def percent_of(part: Decimal, total: Decimal) -> Decimal:
+def percent_of(part: Decimal, total: Decimal, quantizer: Decimal = PERCENT_Q) -> Decimal:
     if total <= 0:
-        return Decimal("0.00")
-    return ((part * Decimal("100")) / total).quantize(PERCENT_Q, rounding=ROUND_HALF_UP)
+        return Decimal("0").quantize(quantizer)
+    return ((part * Decimal("100")) / total).quantize(quantizer, rounding=ROUND_HALF_UP)
