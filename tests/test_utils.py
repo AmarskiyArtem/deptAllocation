@@ -8,6 +8,7 @@ class UtilsTests(unittest.TestCase):
     def test_to_decimal_uses_half_up_rounding(self) -> None:
         self.assertEqual(to_decimal("1.005"), Decimal("1.01"))
         self.assertEqual(to_decimal("1.004"), Decimal("1.00"))
+        self.assertEqual(to_decimal("1,005"), Decimal("1.01"))
 
     def test_money_to_str_formats_two_decimals(self) -> None:
         self.assertEqual(money_to_str("2"), "2.00")

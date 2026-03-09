@@ -8,6 +8,8 @@ from .constants import MONEY_Q, PERCENT_Q
 
 
 def to_decimal(value: Any) -> Decimal:
+    if isinstance(value, str):
+        value = value.strip().replace(",", ".")
     return Decimal(str(value)).quantize(MONEY_Q, rounding=ROUND_HALF_UP)
 
 

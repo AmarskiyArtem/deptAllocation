@@ -28,6 +28,14 @@ from .store import DebtStore
 from .utils import format_datetime_ru, money_to_str, now_iso, percent_of, to_decimal
 
 
+def money_to_ui_str(value: Any) -> str:
+    return money_to_str(value).replace(".", ",")
+
+
+def percent_to_ui_str(value: Decimal, decimals: int = 2) -> str:
+    return f"{value:.{decimals}f}".replace(".", ",")
+
+
 class MainWindow(QMainWindow):
     def __init__(self, store: DebtStore) -> None:
         super().__init__()
@@ -84,7 +92,7 @@ class MainWindow(QMainWindow):
         font.setBold(True)
         self.selected_debtor_label.setFont(font)
         header_row.addWidget(self.selected_debtor_label)
-        self.total_label = QLabel("Общий долг: 0.00")
+        self.total_label = QLabel("Общий долг: 0,00")
         header_row.addWidget(self.total_label)
         header_row.addStretch()
         right_layout.addLayout(header_row)
@@ -125,7 +133,7 @@ class MainWindow(QMainWindow):
         payment_layout = QVBoxLayout(payment_box)
         payment_row = QHBoxLayout()
         payment_row.addWidget(QLabel("Сумма платежа"))
-        self.payment_input = QLineEdit("0.00")
+        self.payment_input = QLineEdit("0,00")
         self.payment_input.setMaximumWidth(160)
         payment_row.addWidget(self.payment_input)
         self.preview_btn = QPushButton("Предпросмотр")
@@ -226,7 +234,7 @@ class MainWindow(QMainWindow):
         else:
             self.selected_debtor_id = None
             self.selected_debtor_label.setText("Выберите должника")
-            self.total_label.setText("Общий долг: 0.00")
+            self.total_label.setText("Общий долг: 0,00")
             self.clear_tables()
         self.debtor_list.blockSignals(False)
 
@@ -240,7 +248,7 @@ class MainWindow(QMainWindow):
             return
 
         self.selected_debtor_label.setText(f"Должник: {debtor['name']}")
-        self.total_label.setText(f"Общий долг: {money_to_str(self.store.total_debt(debtor['id']))}")
+        self.total_label.setText(f"Общий долг: {money_to_ui_str(self.store.total_debt(debtor['id']))}")
 
         creditors = sorted(debtor["creditors"], key=lambda c: c["name"].lower())
         total_claim = sum((to_decimal(c.get("amount", 0)) for c in creditors), Decimal("0.00"))
@@ -249,8 +257,10 @@ class MainWindow(QMainWindow):
             claim = to_decimal(creditor.get("amount", 0))
             name_item = QTableWidgetItem(creditor["name"])
             name_item.setData(Qt.UserRole, creditor["id"])
-            amount_item = QTableWidgetItem(money_to_str(claim))
-            percentage_item = QTableWidgetItem(f"{percent_of(claim, total_claim, EXACT_PERCENT_Q):.6f}%")
+            amount_item = QTableWidgetItem(money_to_ui_str(claim))
+            percentage_item = QTableWidgetItem(
+                f"{percent_to_ui_str(percent_of(claim, total_claim, EXACT_PERCENT_Q), decimals=6)}%"
+            )
             amount_item.setTextAlignment(Qt.AlignRight | Qt.AlignVCenter)
             percentage_item.setTextAlignment(Qt.AlignRight | Qt.AlignVCenter)
             self.creditors_table.setItem(row, 0, name_item)
@@ -276,18 +286,18 @@ class MainWindow(QMainWindow):
             payment_date_display = format_datetime_ru(payment_date)
             remaining_raw = allocation.get("remaining_claim")
 
-            amount_item = QTableWidgetItem(money_to_str(amount_raw))
+            amount_item = QTableWidgetItem(money_to_ui_str(amount_raw))
             percentage_item = QTableWidgetItem("—")
             if percentage_raw not in (None, ""):
                 try:
-                    percentage_item.setText(f"{to_decimal(percentage_raw):.2f}%")
+                    percentage_item.setText(f"{percent_to_ui_str(to_decimal(percentage_raw), decimals=2)}%")
                 except Exception:
                     percentage_item.setText(str(percentage_raw))
 
             remaining_item = QTableWidgetItem("—")
             if remaining_raw not in (None, ""):
                 try:
-                    remaining_item.setText(money_to_str(remaining_raw))
+                    remaining_item.setText(money_to_ui_str(remaining_raw))
                 except Exception:
                     remaining_item.setText(str(remaining_raw))
 
@@ -321,7 +331,7 @@ class MainWindow(QMainWindow):
         return payment
 
     def ask_creditor_data(
-        self, title: str, initial_name: str = "", initial_amount: str = "0.00"
+        self, title: str, initial_name: str = "", initial_amount: str = "0,00"
     ) -> tuple[str, Decimal] | None:
         name, ok = QInputDialog.getText(self, title, "Название кредитора:", text=initial_name)
         if not ok:
@@ -332,7 +342,7 @@ class MainWindow(QMainWindow):
             return None
 
         amount_raw, ok = QInputDialog.getText(
-            self, title, "Сумма долга (например 12500.75):", text=initial_amount
+            self, title, "Сумма долга (например 12500,75):", text=initial_amount
         )
         if not ok:
             return None
@@ -434,7 +444,7 @@ class MainWindow(QMainWindow):
         data = self.ask_creditor_data(
             "Изменить кредитора",
             initial_name=creditor["name"],
-            initial_amount=money_to_str(creditor.get("amount", 0)),
+            initial_amount=money_to_ui_str(creditor.get("amount", 0)),
         )
         if not data:
             return
@@ -483,15 +493,17 @@ class MainWindow(QMainWindow):
         self.preview_table.setRowCount(len(allocations))
         for row, allocation in enumerate(allocations):
             creditor_item = QTableWidgetItem(allocation.creditor_name)
-            amount_item = QTableWidgetItem(money_to_str(allocation.amount))
-            percentage_item = QTableWidgetItem(f"{percent_of(allocation.amount, total_claims):.2f}%")
+            amount_item = QTableWidgetItem(money_to_ui_str(allocation.amount))
+            percentage_item = QTableWidgetItem(
+                f"{percent_to_ui_str(percent_of(allocation.amount, total_claims), decimals=2)}%"
+            )
             payment_date_item = QTableWidgetItem(payment_date_display)
             remaining = (
                 current_by_creditor_id.get(allocation.creditor_id, Decimal("0.00")) - allocation.amount
             ).quantize(MONEY_Q)
             if remaining < 0:
                 remaining = Decimal("0.00")
-            remaining_item = QTableWidgetItem(money_to_str(remaining))
+            remaining_item = QTableWidgetItem(money_to_ui_str(remaining))
             amount_item.setTextAlignment(Qt.AlignRight | Qt.AlignVCenter)
             percentage_item.setTextAlignment(Qt.AlignRight | Qt.AlignVCenter)
             remaining_item.setTextAlignment(Qt.AlignRight | Qt.AlignVCenter)
@@ -502,7 +514,7 @@ class MainWindow(QMainWindow):
             self.preview_table.setItem(row, 4, remaining_item)
 
         self.preview_label.setText(
-            f"Запрошено: {money_to_str(payment)} | Будет применено: {money_to_str(applied)}"
+            f"Запрошено: {money_to_ui_str(payment)} | Будет применено: {money_to_ui_str(applied)}"
         )
         if applied <= 0:
             QMessageBox.information(self, "Информация", "Нет непогашенных долгов для распределения.")
@@ -520,11 +532,11 @@ class MainWindow(QMainWindow):
             QMessageBox.information(self, "Информация", "Нет непогашенных долгов для списания.")
             return
         self.refresh_current_debtor_data()
-        details = ", ".join(f"{a.creditor_name}: {money_to_str(a.amount)}" for a in allocations)
+        details = ", ".join(f"{a.creditor_name}: {money_to_ui_str(a.amount)}" for a in allocations)
         QMessageBox.information(
             self,
             "Платеж применен",
-            f"Списано: {money_to_str(applied)}\nРаспределение: {details}",
+            f"Списано: {money_to_ui_str(applied)}\nРаспределение: {details}",
         )
 
     def on_delete_payment(self) -> None:
