@@ -208,6 +208,25 @@ class MainWindow(QMainWindow):
         splitter.addWidget(right_panel)
         splitter.setStretchFactor(0, 1)
         splitter.setStretchFactor(1, 3)
+        self.apply_table_theme()
+
+    def apply_table_theme(self) -> None:
+        if self.palette().window().color().lightness() >= 128:
+            return
+        table_style = """
+        QTableWidget {
+            gridline-color: white;
+        }
+        QTableWidget::item {
+            border-right: 1px solid white;
+            border-bottom: 1px solid white;
+        }
+        QHeaderView::section {
+            border: 1px solid white;
+        }
+        """
+        for table in (self.creditors_table, self.preview_table, self.history_table):
+            table.setStyleSheet(table_style)
 
     def selected_debtor(self) -> dict[str, Any] | None:
         if not self.selected_debtor_id:
@@ -259,7 +278,7 @@ class MainWindow(QMainWindow):
             name_item.setData(Qt.UserRole, creditor["id"])
             amount_item = QTableWidgetItem(money_to_ui_str(claim))
             percentage_item = QTableWidgetItem(
-                f"{percent_to_ui_str(percent_of(claim, total_claim, EXACT_PERCENT_Q), decimals=6)}%"
+                f"{percent_to_ui_str(percent_of(claim, total_claim, EXACT_PERCENT_Q), decimals=2)}%"
             )
             amount_item.setTextAlignment(Qt.AlignRight | Qt.AlignVCenter)
             percentage_item.setTextAlignment(Qt.AlignRight | Qt.AlignVCenter)
