@@ -212,6 +212,8 @@ class MainWindow(QMainWindow):
 
     def apply_table_theme(self) -> None:
         if self.palette().window().color().lightness() >= 128:
+            for table in (self.creditors_table, self.preview_table, self.history_table):
+                table.setStyleSheet("")
             return
         table_style = """
         QTableWidget {
